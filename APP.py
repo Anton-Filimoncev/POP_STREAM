@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from Road_map import *
 
-st.set_page_config(page_icon='💵', page_title="Monitoring" )
+st.set_page_config(page_icon='💵', page_title="POP" )
 # ---- HIDE STREAMLIT STYLE ----
 # # MainMenu {visibility: hidden;}
 # header {visibility: hidden;}
@@ -16,8 +16,8 @@ st.markdown(hide_st_style, unsafe_allow_html=True)
 
 
 infoType = st.sidebar.radio(
-    "Choose an info type",
-    ('Strangle', 'Short', 'Long', 'Diagonal', 'Calendar') # 'Call Monitoring',
+    "Choose a position type",
+    ('Strangle', 'Short', 'Long', 'Calendar/Diagonal', 'Risk Reversal') # 'Call Monitoring',
 )
 
 
@@ -36,15 +36,15 @@ if infoType == 'Short':
 #     st.title('Long Position')
 #     long()
 #
-# # =====================================   Diagonal
-# if infoType == 'Diagonal':
-#     st.title('Diagonal Position')
-#     diagonal()
+# =====================================   Calendar/Diagonal
+if infoType == 'Calendar/Diagonal':
+    st.title('Calendar/Diagonal Position')
+    calendar_diagonal()
 #
-# # =====================================   Calendar
-# if infoType == 'Calendar':
-#     st.title('Calendar Position')
-#     calendar()
+# =====================================   Risk Reversal
+if infoType == 'Risk Reversal':
+    st.title('Risk Reversal Position')
+    risk_reversal()
 
 
 # =====================================

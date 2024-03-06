@@ -1,7 +1,7 @@
 from numba import jit
-from MonteCarlo import monteCarlo
+from .MonteCarlo import monteCarlo
 import time
-from BlackScholes import blackScholesCall, blackScholesPut
+from .BlackScholes import blackScholesCall, blackScholesPut
 import numpy as np
 
 
