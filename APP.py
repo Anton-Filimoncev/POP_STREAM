@@ -31,10 +31,10 @@ if infoType == 'Short':
     st.title('Short Position')
     short()
 
-# # =====================================   Long
-# if infoType == 'Long':
-#     st.title('Long Position')
-#     long()
+# =====================================   Long
+if infoType == 'Long':
+    st.title('Long Position')
+    long()
 #
 # =====================================   Calendar/Diagonal
 if infoType == 'Calendar/Diagonal':

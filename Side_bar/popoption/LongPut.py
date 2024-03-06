@@ -1,8 +1,8 @@
 from numba import jit
-from MonteCarlo import monteCarlo
-from MonteCarlo_RETURN import monteCarlo_exp_return
+from .MonteCarlo import monteCarlo
+from .MonteCarlo_RETURN import monteCarlo_exp_return
 import time
-from BlackScholes import blackScholesPut
+from .BlackScholes import blackScholesPut
 import numpy as np
 
 

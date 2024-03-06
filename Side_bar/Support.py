@@ -14,6 +14,8 @@ from .popoption.ShortStrangle import shortStrangle
 from .popoption.PutCalendar import putCalendar
 from .popoption.CallCalendar import callCalendar
 from .popoption.RiskReversal import riskReversal
+from .popoption.LongPut import longPut
+from .popoption.LongCall import longCall
 
 def get_yahoo_price(ticker):
     yahoo_data = yf.download(ticker, progress=False)['2018-01-01':]
@@ -90,3 +92,23 @@ def get_risk_reversal(tick, sigma, rate, days_to_expiration, closing_days_array,
     print("risk_reversal_data: ", risk_reversal_data)
 
     return pd.DataFrame(risk_reversal_data)
+
+
+def get_long(tick, sigma, rate, days_to_expiration, closing_days_array, percentage_array,
+                                  long_strike, long_price, position_type):
+
+    yahoo_stock = get_yahoo_price(tick)
+    underlying = yahoo_stock['Close'].iloc[-1]
+    trials = 3000
+
+    if position_type == 'Put':
+        long_data = longPut(underlying, sigma, rate, trials, days_to_expiration, [closing_days_array], [percentage_array],
+                 long_strike, long_price, yahoo_stock)
+        print("Long Put: ", long_data)
+
+    if position_type == 'Call':
+        long_data = longCall(underlying, sigma, rate, trials, days_to_expiration, [closing_days_array], [percentage_array],
+                 long_strike, long_price, yahoo_stock)
+        print("Long Call: ", long_data)
+
+    return pd.DataFrame(long_data)
