@@ -2,35 +2,69 @@ import numpy as np
 import streamlit as st
 import pandas as pd
 from .Support import *
+from .MARKET_DATA import *
 import datetime
 
 
 
 def short():
 
-    position_type = st.radio("Choose a position type", ('Put', 'Call'), horizontal=True)
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        ticker = tick = st.text_input('Ticker', 'KRE')
+
+    with col2:
+        position_type = st.radio("Choose a position type", ('Put', 'Call'), horizontal=True)
+    with col3:
+        nearest_dte = st.number_input('Nearest DTE', step=1, min_value=1, max_value=5000, value=45)
+
+
+    if 'quotes' not in st.session_state:
+        st.session_state['quotes'] = np.nan
+
+    if 'needed_exp_date' not in st.session_state:
+        st.session_state['needed_exp_date'] = np.nan
+
+    if st.button("GET MARKET DATA", type="primary"):
+        needed_exp_date, dte = hedginglab_get_exp_date(ticker, nearest_dte)
+        quotes = hedginglab_get_quotes(ticker, nearest_dte)
+        # st.text(dte)
+        st.text('Exp Date: ' + str(needed_exp_date.date()))
+        # st.dataframe(quotes)
+        st.session_state['quotes'] = quotes
+        st.session_state['needed_exp_date'] = needed_exp_date
+        st.success('Market Data Downloaded!')
+
+    quotes = st.session_state['quotes']
+    needed_exp_date = st.session_state['needed_exp_date']
 
     col11, col12, col13 = st.columns(3)
     with col11:
-        tick = st.text_input('Ticker', 'KRE')
         rate = st.number_input('Risk Rate', step=0.01, format="%.2f", min_value=0., max_value=5000.,  value=4.)
-        percentage_array = st.number_input('Percentage', step=1, min_value=1, max_value=5000, value=50)
-        # end_date_stat = st.date_input('EXP date')
     with col12:
-        # ticker = st.text_input('Ticker', '')
-        short_strike = st.number_input('Strike', step=0.01, format="%.2f", min_value=0., max_value=5000., value=90.)
-        short_price = st.number_input('Price', step=0.01, format="%.2f", min_value=0., max_value=5000.,
-                                            value=1.16)
+        percentage_array = st.number_input('Percentage', step=1, min_value=1, max_value=5000, value=50)
+        try:
+            days_to_expiration = (needed_exp_date - datetime.datetime.now()).days
+        except:
+            days_to_expiration = np.nan #st.date_input('EXP date')
 
     with col13:
-        sigma = st.number_input('Volatility Mean', step=0.01, format="%.2f", min_value=0., max_value=5000., value=55.)
-
-        days_to_expiration = st.number_input('Days to EXP', step=1,  min_value=0, max_value=5000, value=193)
-        closing_days_array = st.number_input('Closing Days Proba', step=1,  min_value=0, max_value=5000,
-                                              value=int(days_to_expiration))
+        try:
+            closing_days_array = st.number_input('Closing Days Proba', step=1, min_value=0, max_value=5000,
+                                                 value=int(days_to_expiration))
+        except:
+            closing_days_array = st.number_input('Closing Days Proba')
 
     if st.button("Calculate", type="primary"):
-        strengle_data = get_short(tick, sigma, rate, days_to_expiration, closing_days_array, percentage_array,
-                                  short_strike, short_price, position_type)
+        print('quotes')
+        print(quotes)
+        short_data, best_df, exp_move_hv, exp_move_iv = get_short(tick, rate, days_to_expiration, closing_days_array, percentage_array,
+                                  position_type, quotes)
 
-        st.dataframe(strengle_data, hide_index=True, column_config=None)
+        st.text('Best Parameters:')
+        st.dataframe(best_df[['pop', 'exp_return', 'cvar', 'Strike']], hide_index=True, column_config=None)
+        st.text('Expected Move HV: ' + str(round(exp_move_hv, 3)))
+        st.text('Expected Move IV: ' + str(round(exp_move_iv, 3)))
+        st.text('Total Parameters:')
+        st.dataframe(short_data, hide_index=True, column_config=None)
