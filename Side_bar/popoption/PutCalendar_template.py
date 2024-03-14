@@ -17,9 +17,9 @@ def bsm_debit(sim_price, strikes, rate, time_fraction_short, time_fraction_long,
     return debit
 
 
-def putCalendar(underlying, sigma_short, sigma_long, rate, trials, days_to_expiration_short,
+def putCalendar_template(underlying, sigma_short, sigma_long, rate, trials, days_to_expiration_short,
                 days_to_expiration_long, closing_days_array, percentage_array, put_long_strike,
-                put_long_price, put_short_strike, put_short_price, yahoo_stock, short_count, long_count):
+                put_long_price, put_short_strike, put_short_price, yahoo_stock, short_count, long_count, position_options):
     # Data Verification
     # if put_long_price <= put_short_price:
     #     raise ValueError("Long price cannot be less than or equal to Short price")
@@ -40,7 +40,7 @@ def putCalendar(underlying, sigma_short, sigma_long, rate, trials, days_to_expir
     initial_credit = put_short_price - put_long_price
     max_profit = initial_debit
     percentage_type = 'Initial'
-    if short_count >= 2:
+    if position_options['pop_from'] == 'margin':
         max_profit = (0.2 * put_short_strike) * (short_count-long_count)
         percentage_type = 'Margin'
 

@@ -12,7 +12,7 @@ def short():
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        ticker = tick = st.text_input('Ticker', 'KRE')
+        ticker = st.text_input('Ticker', 'KRE')
 
     with col2:
         position_type = st.radio("Choose a position type", ('Put', 'Call'), horizontal=True)
@@ -59,7 +59,7 @@ def short():
     if st.button("Calculate", type="primary"):
         print('quotes')
         print(quotes)
-        short_data, best_df, exp_move_hv, exp_move_iv = get_short(tick, rate, days_to_expiration, closing_days_array, percentage_array,
+        short_data, best_df, exp_move_hv, exp_move_iv = get_short(ticker, rate, days_to_expiration, closing_days_array, percentage_array,
                                   position_type, quotes)
 
         st.text('Best Parameters:')

@@ -118,6 +118,8 @@ def get_exp_dates(ticker, trade_date, KEY, look_dte):
         exp_df = pd.to_datetime(pd.Series(response['expire_date_list']), format="%Y/%m/%d")
 
     exp_df_days = (exp_df - datetime.datetime.strptime(trade_date, '%Y-%m-%d')).dt.days
+    print('exp_df_days', exp_df_days)
+    print('look_dte', look_dte)
     needed_dte = nearest_equal_abs(exp_df_days.values.tolist(), look_dte)
     needed_exp_date_index = (exp_df_days[exp_df_days == needed_dte]).index
     needed_exp_date = exp_df.iloc[needed_exp_date_index].dt.date.iloc[0]
