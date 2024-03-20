@@ -18,7 +18,7 @@ def bsm_debit(sim_price, strikes, rate, time_fraction_short, time_fraction_long,
 
 def callCalendar_template(underlying, sigma_short, sigma_long, rate, trials, days_to_expiration_short,
                 days_to_expiration_long, closing_days_array, percentage_array, call_long_strike,
-                call_long_price, call_short_strike, call_short_price, yahoo_stock, short_count, long_count):
+                call_long_price, call_short_strike, call_short_price, yahoo_stock, short_count, long_count, position_options):
     # Data Verification
     # if call_long_price <= call_short_price:
     #     raise ValueError("Long price cannot be less than or equal to Short price")
@@ -40,9 +40,15 @@ def callCalendar_template(underlying, sigma_short, sigma_long, rate, trials, day
     max_profit = initial_debit
     percentage_type = 'Initial'
 
-    if short_count >= 2:
-        max_profit = (0.2 * call_short_strike) * (short_count-long_count)
-        percentage_type = 'Margin'
+    if position_options['pop_from'] == 'margin':
+        if position_options['type'] == 'BEAR CALL DIAGONAL':
+            max_profit = call_long_strike - call_short_strike - initial_credit
+            percentage_type = 'Margin'
+        else:
+            max_profit = (0.2 * call_short_strike) * (short_count-long_count)
+            percentage_type = 'Margin'
+
+
 
     percentage_array = [x / 100 for x in percentage_array]
 

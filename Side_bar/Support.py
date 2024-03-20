@@ -186,12 +186,12 @@ def get_calendar_diagonal(tick, rate, days_to_expiration_long, days_to_expiratio
 
     if position_type == 'put':
         quotes_short = quotes_short[quotes_short['side'] == 'put'].reset_index(drop=True)
-        quotes_short = quotes_short[quotes_short['strike'] <= underlying * 1].reset_index(drop=True)
-        quotes_short = quotes_short[quotes_short['strike'] >= underlying * 0.9].reset_index(drop=True)
+        quotes_short = quotes_short[quotes_short['strike'] <= underlying * position_options['short_strike_limit_to']].reset_index(drop=True)
+        quotes_short = quotes_short[quotes_short['strike'] >= underlying * position_options['short_strike_limit_from']].reset_index(drop=True)
 
         quotes_long = quotes_long[quotes_long['side'] == 'put'].reset_index(drop=True)
-        quotes_long = quotes_long[quotes_long['strike'] <= underlying * 1.1].reset_index(drop=True)
-        quotes_long = quotes_long[quotes_long['strike'] >= underlying * 1].reset_index(drop=True)
+        quotes_long = quotes_long[quotes_long['strike'] <= underlying * position_options['long_strike_limit_to']].reset_index(drop=True)
+        quotes_long = quotes_long[quotes_long['strike'] >= underlying * position_options['long_strike_limit_from']].reset_index(drop=True)
         for num, quotes_short_row in quotes_short.iterrows():
             for num_long, quotes_long_row in quotes_long.iterrows():
                 sigma_short = quotes_short_row['iv'] * 100
@@ -201,25 +201,48 @@ def get_calendar_diagonal(tick, rate, days_to_expiration_long, days_to_expiratio
                 long_strike = quotes_long_row['strike']
                 long_price = quotes_long_row['ask'] * long_count
 
-                calendar_diagonal_data, max_profit, percentage_type = putCalendar_template(underlying, sigma_short, sigma_long, rate, trials,
-                                                     days_to_expiration_short, days_to_expiration_long,
-                                                     [closing_days_array],
-                                                     [percentage_array], long_strike, long_price, short_strike,
-                                                     short_price, yahoo_stock, short_count, long_count, position_options)
-                print('calendar_diagonal_data', calendar_diagonal_data)
-                calendar_diagonal_data = pd.DataFrame(calendar_diagonal_data)
-                calendar_diagonal_data['Strike_Short'] = [short_strike]
-                calendar_diagonal_data['Strike_Long'] = [long_strike]
-                sum_df = pd.concat([sum_df, calendar_diagonal_data])
+                if position_options['structure'] == 'calendar':
+                    if quotes_short_row['strike'] == quotes_long_row['strike']:
+                        calendar_diagonal_data, max_profit, percentage_type = putCalendar_template(underlying, sigma_short, sigma_long, rate, trials,
+                                                             days_to_expiration_short, days_to_expiration_long,
+                                                             [closing_days_array],
+                                                             [percentage_array], long_strike, long_price, short_strike,
+                                                             short_price, yahoo_stock, short_count, long_count, position_options)
+                        print('calendar_diagonal_data', calendar_diagonal_data)
+                        calendar_diagonal_data = pd.DataFrame(calendar_diagonal_data)
+                        calendar_diagonal_data['Strike_Short'] = [short_strike]
+                        calendar_diagonal_data['Strike_Long'] = [long_strike]
+                        sum_df = pd.concat([sum_df, calendar_diagonal_data])
+                else:
+                    calendar_diagonal_data, max_profit, percentage_type = putCalendar_template(underlying, sigma_short,
+                                                                                               sigma_long, rate, trials,
+                                                                                               days_to_expiration_short,
+                                                                                               days_to_expiration_long,
+                                                                                               [closing_days_array],
+                                                                                               [percentage_array],
+                                                                                               long_strike, long_price,
+                                                                                               short_strike,
+                                                                                               short_price, yahoo_stock,
+                                                                                               short_count, long_count,
+                                                                                               position_options)
+                    print('calendar_diagonal_data', calendar_diagonal_data)
+                    calendar_diagonal_data = pd.DataFrame(calendar_diagonal_data)
+                    calendar_diagonal_data['Strike_Short'] = [short_strike]
+                    calendar_diagonal_data['Strike_Long'] = [long_strike]
+                    sum_df = pd.concat([sum_df, calendar_diagonal_data])
 
     if position_type == 'call':
         quotes_short = quotes_short[quotes_short['side'] == 'call'].reset_index(drop=True)
-        quotes_short = quotes_short[quotes_short['strike'] <= underlying * 1].reset_index(drop=True)
-        quotes_short = quotes_short[quotes_short['strike'] >= underlying * 0.9].reset_index(drop=True)
+        quotes_short = quotes_short[quotes_short['strike'] <= underlying * position_options['short_strike_limit_to']].reset_index(drop=True)
+        quotes_short = quotes_short[quotes_short['strike'] >= underlying * position_options['short_strike_limit_from']].reset_index(drop=True)
 
         quotes_long = quotes_long[quotes_long['side'] == 'call'].reset_index(drop=True)
-        quotes_long = quotes_long[quotes_long['strike'] <= underlying * 1.1].reset_index(drop=True)
-        quotes_long = quotes_long[quotes_long['strike'] >= underlying * 1].reset_index(drop=True)
+        quotes_long = quotes_long[quotes_long['strike'] <= underlying * position_options['long_strike_limit_to']].reset_index(drop=True)
+        quotes_long = quotes_long[quotes_long['strike'] >= underlying * position_options['long_strike_limit_from']].reset_index(drop=True)
+
+        # if position_options['structure'] == 'calendar':
+        #     quotes_long =
+
         for num, quotes_short_row in quotes_short.iterrows():
             for num_long, quotes_long_row in quotes_long.iterrows():
                 sigma_short = quotes_short_row['iv'] * 100
@@ -230,17 +253,49 @@ def get_calendar_diagonal(tick, rate, days_to_expiration_long, days_to_expiratio
                 long_strike = quotes_long_row['strike']
                 long_price = quotes_long_row['ask'] * long_count
 
-                calendar_diagonal_data, max_profit, percentage_type = putCalendar_template(underlying, sigma_short, sigma_long, rate, trials,
-                                                     days_to_expiration_short, days_to_expiration_long,
-                                                     [closing_days_array],
-                                                     [percentage_array], long_strike, long_price, short_strike,
-                                                     short_price, yahoo_stock,
-                                                     short_count, long_count)
+                print('short bid', quotes_short_row['bid'])
+                print('short_price', short_price)
+                print('long ask', quotes_long_row['ask'])
+                print('long_price', long_price)
+                print('long_strike', long_strike)
+                print('short_strike', short_strike)
+                print('long_strike', sigma_long)
+                print('short_strike', sigma_short)
+                print('days_to_expiration_short', days_to_expiration_short)
+                print('days_to_expiration_long', days_to_expiration_long)
 
-                calendar_diagonal_data = pd.DataFrame(calendar_diagonal_data)
-                calendar_diagonal_data['Strike_Short'] = [short_strike]
-                calendar_diagonal_data['Strike_Long'] = [long_strike]
-                sum_df = pd.concat([sum_df, calendar_diagonal_data])
+                if position_options['structure'] == 'calendar':
+                    if quotes_short_row['strike'] == quotes_long_row['strike']:
+                        calendar_diagonal_data, max_profit, percentage_type = callCalendar_template(underlying, sigma_short, sigma_long, rate, trials,
+                                                             days_to_expiration_short, days_to_expiration_long,
+                                                             [closing_days_array],
+                                                             [percentage_array], long_strike, long_price, short_strike,
+                                                             short_price, yahoo_stock,
+                                                             short_count, long_count, position_options)
+
+                        calendar_diagonal_data = pd.DataFrame(calendar_diagonal_data)
+                        calendar_diagonal_data['Strike_Short'] = [short_strike]
+                        calendar_diagonal_data['Strike_Long'] = [long_strike]
+                        sum_df = pd.concat([sum_df, calendar_diagonal_data])
+                else:
+                    calendar_diagonal_data, max_profit, percentage_type = callCalendar_template(underlying, sigma_short,
+                                                                                                sigma_long, rate,
+                                                                                                trials,
+                                                                                                days_to_expiration_short,
+                                                                                                days_to_expiration_long,
+                                                                                                [closing_days_array],
+                                                                                                [percentage_array],
+                                                                                                long_strike, long_price,
+                                                                                                short_strike,
+                                                                                                short_price,
+                                                                                                yahoo_stock,
+                                                                                                short_count, long_count,
+                                                                                                position_options)
+
+                    calendar_diagonal_data = pd.DataFrame(calendar_diagonal_data)
+                    calendar_diagonal_data['Strike_Short'] = [short_strike]
+                    calendar_diagonal_data['Strike_Long'] = [long_strike]
+                    sum_df = pd.concat([sum_df, calendar_diagonal_data])
 
     nearest_atm_strike = nearest_equal_abs(quotes_short['strike'].astype('float'), underlying)
     iv = quotes_short[quotes_short['strike'] == nearest_atm_strike]['iv'].values.tolist()[0]
@@ -251,7 +306,7 @@ def get_calendar_diagonal(tick, rate, days_to_expiration_long, days_to_expiratio
     exp_move_hv = hv * underlying * math.sqrt(days_to_expiration_short / 365)
     exp_move_iv = iv * underlying * math.sqrt(days_to_expiration_short / 365)
 
-    return sum_df, best_df, exp_move_hv, exp_move_iv
+    return sum_df, best_df, exp_move_hv, exp_move_iv, max_profit, percentage_type
 
 
 def get_calendar_diagonal_input(tick, sigma_long, sigma_short, rate, days_to_expiration_long,

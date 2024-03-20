@@ -6,14 +6,11 @@ from .MARKET_DATA import *
 import datetime
 
 
-# Продаем 2 пута DTE 30, покупаем 1 пут DTE 90.
-# Страйки одинаковы.
-# Подбор в диапазоне от ATM до - 7 процентов.
-# POP считаем от маржи. Маржу считаем как страйк пута * 0.2
-
 def tamplate_gen(template_position):
     if template_position == 'BEAR PUT RATIO CALENDAR':
         position_options = {
+                            'type': 'BEAR PUT RATIO CALENDAR',
+                            'structure': 'calendar',
                             'short': 'put',
                             'long': 'put',
                             'short_count': 2,
@@ -22,26 +19,98 @@ def tamplate_gen(template_position):
                             'long_DTE': 90,
                             'short_strike_limit_from': 0.93,
                             'short_strike_limit_to': 1,
+                            'long_strike_limit_from': 0.93,
+                            'long_strike_limit_to': 1,
                             'pop_from': 'margin',
-
                         }
-        pass
     if template_position == 'BEAR PUT RATIO DIAGONAL':
-        pass
+        position_options = {
+                            'type': 'BEAR PUT RATIO DIAGONAL',
+                            'structure': 'diagonal',
+                            'short': 'put',
+                            'long': 'put',
+                            'short_count': 2,
+                            'long_count': 1,
+                            'short_DTE': 30,
+                            'long_DTE': 90,
+                            'short_strike_limit_from': 0.93,
+                            'short_strike_limit_to': 1,
+                            'long_strike_limit_from': 1,
+                            'long_strike_limit_to': 1.07,
+                            'pop_from': 'margin',
+                        }
+
     if template_position == 'BULL PUT DIAGONAL':
-        pass
+        position_options = {
+                            'type': 'BULL PUT DIAGONAL',
+                            'structure': 'diagonal',
+                            'short': 'put',
+                            'long': 'put',
+                            'short_count': 1,
+                            'long_count': 1,
+                            'short_DTE': 30,
+                            'long_DTE': 90,
+                            'short_strike_limit_from': 1,
+                            'short_strike_limit_to': 1.05,
+                            'long_strike_limit_from': 0.93,
+                            'long_strike_limit_to': 1,
+                            'pop_from': 'initial',
+                        }
     if template_position == 'BULL CALL RATIO CALENDAR':
-        pass
+        position_options = {
+                                'type': 'BULL CALL RATIO CALENDAR',
+                                'structure': 'calendar',
+                                'short': 'call',
+                                'long': 'call',
+                                'short_count': 2,
+                                'long_count': 1,
+                                'short_DTE': 30,
+                                'long_DTE': 90,
+                                'short_strike_limit_from': 1,
+                                'short_strike_limit_to': 1.05,
+                                'long_strike_limit_from': 1,
+                                'long_strike_limit_to': 1.05,
+                                'pop_from': 'margin',
+                            }
     if template_position == 'BULL CALL RATIO DIAGONAL':
-        pass
+        position_options = {
+                                'type': 'BULL CALL RATIO DIAGONAL',
+                                'structure': 'diagonal',
+                                'short': 'call',
+                                'long': 'call',
+                                'short_count': 2,
+                                'long_count': 1,
+                                'short_DTE': 30,
+                                'long_DTE': 90,
+                                'short_strike_limit_from': 1,
+                                'short_strike_limit_to': 1.05,
+                                'long_strike_limit_from': 0.95,
+                                'long_strike_limit_to': 1,
+                                'pop_from': 'margin',
+                            }
+
     if template_position == 'BEAR CALL DIAGONAL':
-        pass
+        position_options = {
+                                'type': 'BEAR CALL DIAGONAL',
+                                'structure': 'diagonal',
+                                'short': 'call',
+                                'long': 'call',
+                                'short_count': 1,
+                                'long_count': 1,
+                                'short_DTE': 30,
+                                'long_DTE': 60,
+                                'short_strike_limit_from': 0.95,
+                                'short_strike_limit_to': 1,
+                                'long_strike_limit_from': 1,
+                                'long_strike_limit_to': 1.05,
+                                'pop_from': 'margin',
+                            }
 
     return position_options
 
 
 def calendar_diagonal():
-    position_type = st.radio("Choose a position type ", ('Put', 'Call'), horizontal=True)
+    position_type = st.radio("Choose a position type 👇", ('Put', 'Call'), horizontal=True)
 
     col21, col22, col23, col24 = st.columns(4)
     with col21:
@@ -174,7 +243,7 @@ def calendar_diagonal():
         if type(quotes_short) == type(1.):
             st.error('Pleas Download Market Data', icon="🚨")
         else:
-            strengle_data, best_df, exp_move_hv, exp_move_iv = get_calendar_diagonal(ticker, rate,
+            strengle_data, best_df, exp_move_hv, exp_move_iv, profit_for_percent, percentage_type = get_calendar_diagonal(ticker, rate,
                                                                                      days_to_expiration_long,
                                                                                      days_to_expiration_short,
                                                                                      closing_days_array,
@@ -182,6 +251,7 @@ def calendar_diagonal():
                                                                                      quotes_short, quotes_long,
                                                                                      short_count, long_count, position_options)
 
+            st.text(f'Profit Percentage form {percentage_type}: {round(profit_for_percent, 2)}')
             st.text('Best Parameters:')
             st.dataframe(best_df[['pop', 'exp_return', 'cvar', 'Strike_Long', 'Strike_Short']], hide_index=True,
                          column_config=None)

@@ -35,9 +35,9 @@ def putCalendar(underlying, sigma_short, sigma_long, rate, trials, days_to_expir
         raise ValueError("closing_days_array and percentage_array sizes must be equal.")
 
     # SIMULATION
-    initial_debit = abs(put_long_price - put_short_price)  # Debit paid from opening trade
+    initial_debit = abs((put_long_price*long_count) - (put_short_price*short_count))  # Debit paid from opening trade
     # initial_credit = -1 * initial_debit
-    initial_credit = put_short_price - put_long_price
+    initial_credit = (put_short_price*short_count) -(put_long_price*long_count)
     max_profit = initial_debit
     percentage_type = 'Initial'
     if short_count >= 2:

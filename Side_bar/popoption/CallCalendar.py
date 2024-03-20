@@ -34,9 +34,9 @@ def callCalendar(underlying, sigma_short, sigma_long, rate, trials, days_to_expi
         raise ValueError("closing_days_array and percentage_array sizes must be equal.")
 
     # SIMULATION
-    initial_debit = abs(call_long_price - call_short_price)  # Debit paid from opening trade
+    initial_debit = abs((call_long_price*long_count) - (call_short_price*short_count))  # Debit paid from opening trade
     # initial_credit = -1 * initial_debit
-    initial_credit = call_short_price - call_long_price
+    initial_credit = (call_short_price*short_count) - (call_long_price*long_count)
     max_profit = initial_debit
     percentage_type = 'Initial'
 

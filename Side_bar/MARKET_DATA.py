@@ -103,19 +103,16 @@ def nearest_equal_abs(lst, target):
 
 
 def get_exp_dates(ticker, trade_date, KEY, look_dte):
-    try:
-        url = f"https://www.hedginglab.com:/api/beta/v1/option_expire_date/{ticker}/?trade_date={trade_date}&apikey={KEY}"
-        print(url)
-        response = requests.request("GET", url).json()
-        print(response)
-        exp_df = pd.to_datetime(pd.Series(response['expire_date_list']), format="%Y/%m/%d")
-    except:
-        trade_date = (datetime.date.today() - relativedelta(days=3)).strftime('%Y-%m-%d')
-        url = f"https://www.hedginglab.com:/api/beta/v1/option_expire_date/{ticker}/?trade_date={trade_date}&apikey={KEY}"
-        print(url)
-        response = requests.request("GET", url).json()
-        print(response)
-        exp_df = pd.to_datetime(pd.Series(response['expire_date_list']), format="%Y/%m/%d")
+    while True:
+        try:
+            url = f"https://www.hedginglab.com:/api/beta/v1/option_expire_date/{ticker}/?trade_date={trade_date}&apikey={KEY}"
+            print(url)
+            response = requests.request("GET", url).json()
+            print(response)
+            exp_df = pd.to_datetime(pd.Series(response['expire_date_list']), format="%Y/%m/%d")
+            break
+        except:
+            trade_date = (datetime.datetime.strptime(trade_date, '%Y-%m-%d') - relativedelta(days=1)).strftime('%Y-%m-%d')
 
     exp_df_days = (exp_df - datetime.datetime.strptime(trade_date, '%Y-%m-%d')).dt.days
     print('exp_df_days', exp_df_days)
