@@ -14,9 +14,10 @@ import math
 # Earnings date and stock splits are not considered.
 
 
-def monteCarlo(underlying, rate, sigma_short, sigma_long, days_to_expiration_short, days_to_expiration_long,
-               closing_days_array, trials, initial_credit, min_profit, strikes, bsm_func, yahoo_stock, short_count,
-               long_count):
+def monteCarlo(underlying, rate, sigma_long, sigma_short_1, sigma_short_2,
+                                                days_to_expiration, closing_days_array, trials, initial_credit,
+                                                min_profit, strikes, bsm_func, yahoo_stock, long_count,
+                                                short_1_count, short_2_count):
 
     profit_list = []
     price_list = []
@@ -42,7 +43,7 @@ def monteCarlo(underlying, rate, sigma_short, sigma_long, days_to_expiration_sho
     length = len(closing_days_array)
     max_closing_days = max(closing_days_array)
 
-    sigma_short, sigma_long = sigma_short / 100, sigma_long / 100
+    sigma_long, sigma_short_1, sigma_short_2 = sigma_long / 100, sigma_short_1 / 100, sigma_short_2 / 100
     rate = rate / 100
 
     counter1 = [0] * length
@@ -83,11 +84,11 @@ def monteCarlo(underlying, rate, sigma_short, sigma_long, days_to_expiration_sho
             if stock_price <= 0:
                 stock_price = 0.001
 
-            time_fraction_short = dt * (days_to_expiration_short - r)
-            time_fraction_long = dt * (days_to_expiration_long - r)
+            time_fraction = dt * (days_to_expiration - r)
+            # time_fraction_long = dt * (days_to_expiration_long - r)
 
-            debit = bsm_func(stock_price, strikes, rate, time_fraction_short, time_fraction_long, sigma_short,
-                             sigma_long, short_count, long_count)
+            debit = bsm_func(stock_price, strikes, rate, time_fraction, sigma_long, sigma_short_1, sigma_short_2,
+                             long_count, short_1_count, short_2_count)
 
 
             profit = debit + initial_credit  # Profit if we were to close on current day

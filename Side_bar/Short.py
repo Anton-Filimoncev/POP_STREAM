@@ -17,7 +17,7 @@ def short():
     with col2:
         position_type = st.radio("Choose a position type", ('Put', 'Call'), horizontal=True)
     with col3:
-        nearest_dte = st.number_input('Nearest DTE', step=1, min_value=1, max_value=5000, value=45)
+        nearest_dte = st.number_input('Nearest DTE', step=1, min_value=1, max_value=50000, value=45)
 
 
     if 'quotes' not in st.session_state:
@@ -41,9 +41,9 @@ def short():
 
     col11, col12, col13 = st.columns(3)
     with col11:
-        rate = st.number_input('Risk Rate', step=0.01, format="%.2f", min_value=0., max_value=5000.,  value=4.)
+        rate = st.number_input('Risk Rate', step=0.01, format="%.2f", min_value=0., max_value=50000.,  value=4.)
     with col12:
-        percentage_array = st.number_input('Percentage', step=1, min_value=1, max_value=5000, value=50)
+        percentage_array = st.number_input('Percentage', step=1, min_value=1, max_value=50000, value=50)
         try:
             days_to_expiration = (needed_exp_date - datetime.datetime.now()).days
         except:
@@ -51,7 +51,7 @@ def short():
 
     with col13:
         try:
-            closing_days_array = st.number_input('Closing Days Proba', step=1, min_value=0, max_value=5000,
+            closing_days_array = st.number_input('Closing Days Proba', step=1, min_value=0, max_value=50000,
                                                  value=int(days_to_expiration))
         except:
             closing_days_array = st.number_input('Closing Days Proba')

@@ -17,12 +17,12 @@ def bsm_debit(sim_price, strikes, rate, time_fraction, sigma):
 def shortCall(underlying, sigma, rate, trials, days_to_expiration,
               closing_days_array, percentage_array, short_strike, short_price, yahoo_stock):
 
-    for closing_days in closing_days_array:
-        if closing_days > days_to_expiration:
-            raise ValueError("Closing days cannot be beyond Days To Expiration.")
-
-    if len(closing_days_array) != len(percentage_array):
-        raise ValueError("closing_days_array and percentage_array sizes must be equal.")
+    # for closing_days in closing_days_array:
+    #     if closing_days > days_to_expiration:
+    #         raise ValueError("Closing days cannot be beyond Days To Expiration.")
+    #
+    # if len(closing_days_array) != len(percentage_array):
+    #     raise ValueError("closing_days_array and percentage_array sizes must be equal.")
 
     # SIMULATION
     initial_credit = short_price  # Credit received from opening trade

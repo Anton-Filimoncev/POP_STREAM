@@ -122,20 +122,20 @@ def calendar_diagonal():
 
     with col22:
         # ticker = st.text_input('Ticker', '')
-        long_strike = st.number_input('Strike Long', step=0.01, format="%.2f", min_value=0., max_value=5000.,
+        long_strike = st.number_input('Strike Long', step=0.01, format="%.2f", min_value=0., max_value=50000.,
                                       value=150.)
-        long_price = st.number_input('Price Long', step=0.01, format="%.2f", min_value=0., max_value=5000.,
+        long_price = st.number_input('Price Long', step=0.01, format="%.2f", min_value=0., max_value=50000.,
                                      value=28.45)
-        sigma_long = st.number_input('Volatility Long', step=0.01, format="%.2f", min_value=0., max_value=5000.,
+        sigma_long = st.number_input('Volatility Long', step=0.01, format="%.2f", min_value=0., max_value=50000.,
                                      value=28.99)
-        long_count_solo = st.number_input('Long Count ', step=1, min_value=1, max_value=5000, value=1)
+        long_count_solo = st.number_input('Long Count ', step=1, min_value=1, max_value=50000, value=1)
     with col23:
         # ticker = st.text_input('Ticker', '')
-        short_strike = st.number_input('Strike Short', step=0.01, format="%.2f", min_value=0., max_value=5000.,
+        short_strike = st.number_input('Strike Short', step=0.01, format="%.2f", min_value=0., max_value=50000.,
                                        value=150.)
-        short_price = st.number_input('Price Short', step=0.01, format="%.2f", min_value=0., max_value=5000.,
+        short_price = st.number_input('Price Short', step=0.01, format="%.2f", min_value=0., max_value=50000.,
                                       value=19.6)
-        sigma_short = st.number_input('Volatility Short', step=0.01, format="%.2f", min_value=0., max_value=5000.,
+        sigma_short = st.number_input('Volatility Short', step=0.01, format="%.2f", min_value=0., max_value=50000.,
                                       value=28.7)
 
     with col24:
@@ -169,93 +169,95 @@ def calendar_diagonal():
 
     st.write('You selected:', template_position)
 
-    position_options = tamplate_gen(template_position)
-    print(position_options)
+    if template_position != None:
 
-    col1, col2, col3 = st.columns(3)
+        position_options = tamplate_gen(template_position)
+        print(position_options)
 
-    with col1:
-        ticker = st.text_input('Ticker', 'KRE')
-        short_count = st.number_input('Short Count', step=1, min_value=1, max_value=5000, value=position_options['short_count'])
-    with col2:
-        if position_options['short'] == 'put':
-            position_type = st.radio("Choose a position type 👇", ('put', 'call'), horizontal=True)
-        else:
-            position_type = st.radio("Choose a position type 👇", ('call', 'put'), horizontal=True)
-        long_count = st.number_input('Long Count', step=1, min_value=1, max_value=5000, value=position_options['long_count'])
-    with col3:
-        nearest_dte_short = st.number_input('Nearest DTE Short', step=1, min_value=1, max_value=5000, value=position_options['short_DTE'])
-        nearest_dte_long = st.number_input('Nearest DTE Long', step=1, min_value=1, max_value=5000, value=position_options['long_DTE'])
+        col1, col2, col3 = st.columns(3)
 
-    if 'quotes_short' not in st.session_state:
-        st.session_state['quotes_short'] = np.nan
+        with col1:
+            ticker_batch = st.text_input('Ticker', 'KRE')
+            short_count = st.number_input('Short Count', step=1, min_value=1, max_value=5000, value=position_options['short_count'])
+        with col2:
+            if position_options['short'] == 'put':
+                position_type = st.radio("Choose a position type 👇", ('put', 'call'), horizontal=True)
+            else:
+                position_type = st.radio("Choose a position type 👇", ('call', 'put'), horizontal=True)
+            long_count = st.number_input('Long Count', step=1, min_value=1, max_value=5000, value=position_options['long_count'])
+        with col3:
+            nearest_dte_short = st.number_input('Nearest DTE Short', step=1, min_value=1, max_value=5000, value=position_options['short_DTE'])
+            nearest_dte_long = st.number_input('Nearest DTE Long', step=1, min_value=1, max_value=5000, value=position_options['long_DTE'])
 
-    if 'quotes_long' not in st.session_state:
-        st.session_state['quotes_long'] = np.nan
+        if 'quotes_short_batch' not in st.session_state:
+            st.session_state['quotes_short_batch'] = np.nan
 
-    if 'needed_exp_date_long' not in st.session_state:
-        st.session_state['needed_exp_date_long'] = np.nan
+        if 'quotes_long_batch' not in st.session_state:
+            st.session_state['quotes_long_batch'] = np.nan
 
-    if 'needed_exp_date_short' not in st.session_state:
-        st.session_state['needed_exp_date_short'] = np.nan
+        if 'needed_exp_date_long_batch' not in st.session_state:
+            st.session_state['needed_exp_date_long_batch'] = np.nan
 
-    if st.button("GET MARKET DATA", type="primary"):
-        needed_exp_date_short, dte = hedginglab_get_exp_date(ticker, nearest_dte_short)
-        needed_exp_date_long, dte = hedginglab_get_exp_date(ticker, nearest_dte_long)
-        quotes_short = hedginglab_get_quotes(ticker, nearest_dte_short)
-        quotes_long = hedginglab_get_quotes(ticker, nearest_dte_long)
-        st.text('Exp Date Short: ' + str(needed_exp_date_short.date()))
-        st.text('Exp Date Long: ' + str(needed_exp_date_long.date()))
-        # st.dataframe(quotes)
-        st.session_state['quotes_short'] = quotes_short
-        st.session_state['quotes_long'] = quotes_long
-        st.session_state['needed_exp_date_short'] = needed_exp_date_short
-        st.session_state['needed_exp_date_long'] = needed_exp_date_long
-        st.success('Market Data Downloaded!')
+        if 'needed_exp_date_short_batch' not in st.session_state:
+            st.session_state['needed_exp_date_short_batch'] = np.nan
 
-    quotes_short = st.session_state['quotes_short']
-    quotes_long = st.session_state['quotes_long']
-    needed_exp_date_short = st.session_state['needed_exp_date_short']
-    needed_exp_date_long = st.session_state['needed_exp_date_long']
+        if st.button("GET MARKET DATA", type="primary"):
+            needed_exp_date_short, dte = hedginglab_get_exp_date(ticker_batch, nearest_dte_short)
+            needed_exp_date_long, dte = hedginglab_get_exp_date(ticker_batch, nearest_dte_long)
+            quotes_short = hedginglab_get_quotes(ticker_batch, nearest_dte_short)
+            quotes_long = hedginglab_get_quotes(ticker_batch, nearest_dte_long)
+            st.text('Exp Date Short: ' + str(needed_exp_date_short.date()))
+            st.text('Exp Date Long: ' + str(needed_exp_date_long.date()))
+            # st.dataframe(quotes)
+            st.session_state['quotes_short_batch'] = quotes_short
+            st.session_state['quotes_long_batch'] = quotes_long
+            st.session_state['needed_exp_date_short_batch'] = needed_exp_date_short
+            st.session_state['needed_exp_date_long_batch'] = needed_exp_date_long
+            st.success('Market Data Downloaded!')
+
+        quotes_short = st.session_state['quotes_short_batch']
+        quotes_long = st.session_state['quotes_long_batch']
+        needed_exp_date_short = st.session_state['needed_exp_date_short_batch']
+        needed_exp_date_long = st.session_state['needed_exp_date_long_batch']
 
 
 
-    col11, col12, col13 = st.columns(3)
-    with col11:
-        rate = st.number_input('Risk Rate', step=0.01, format="%.2f", min_value=0., max_value=5000., value=4.)
-    with col12:
-        percentage_array = st.number_input('Percentage', step=1, min_value=1, max_value=5000, value=10)
-        try:
-            days_to_expiration_long = (needed_exp_date_long - datetime.datetime.now()).days
-            days_to_expiration_short = (needed_exp_date_short - datetime.datetime.now()).days
-        except:
-            days_to_expiration_long = np.nan
-            days_to_expiration_short = np.nan  # st.date_input('EXP date')
+        col11, col12, col13 = st.columns(3)
+        with col11:
+            rate = st.number_input('Risk Rate: ', step=0.01, format="%.2f", min_value=0., max_value=5000., value=4.)
+        with col12:
+            percentage_array = st.number_input('Percentage: ', step=1, min_value=1, max_value=5000, value=10)
+            # try:
+            days_to_expiration_long_batch = (needed_exp_date_long - datetime.datetime.now()).days
+            days_to_expiration_short_batch = (needed_exp_date_short - datetime.datetime.now()).days
+            # except:
+            #     days_to_expiration_long_batch = np.nan
+            #     days_to_expiration_short_batch = np.nan  # st.date_input('EXP date')
 
-    with col13:
-        try:
-            closing_days_array = st.number_input('Closing Days Proba', step=1, min_value=0, max_value=5000,
-                                                 value=int(days_to_expiration_short))
-        except:
-            closing_days_array = st.number_input('Closing Days Proba')
+        with col13:
+            # try:
+            closing_days_array = st.number_input('Closing Days Proba: ', step=1, min_value=0, max_value=5000,
+                                                     value=int(days_to_expiration_short_batch))
+            # except:
+            #     closing_days_array = st.number_input(' Closing Days Proba ')
 
-    if st.button("Calculate", type="primary"):
-        if type(quotes_short) == type(1.):
-            st.error('Pleas Download Market Data', icon="🚨")
-        else:
-            strengle_data, best_df, exp_move_hv, exp_move_iv, profit_for_percent, percentage_type = get_calendar_diagonal(ticker, rate,
-                                                                                     days_to_expiration_long,
-                                                                                     days_to_expiration_short,
-                                                                                     closing_days_array,
-                                                                                     percentage_array, position_type,
-                                                                                     quotes_short, quotes_long,
-                                                                                     short_count, long_count, position_options)
+        if st.button("Calculate", type="primary"):
+            if type(quotes_short) == type(1.):
+                st.error('Pleas Download Market Data', icon="🚨")
+            else:
+                strengle_data, best_df, exp_move_hv, exp_move_iv, profit_for_percent, percentage_type = get_calendar_diagonal(ticker_batch, rate,
+                                                                                         days_to_expiration_long_batch,
+                                                                                         days_to_expiration_short_batch,
+                                                                                         closing_days_array,
+                                                                                         percentage_array, position_type,
+                                                                                         quotes_short, quotes_long,
+                                                                                         short_count, long_count, position_options)
 
-            st.text(f'Profit Percentage form {percentage_type}: {round(profit_for_percent, 2)}')
-            st.text('Best Parameters:')
-            st.dataframe(best_df[['pop', 'exp_return', 'cvar', 'Strike_Long', 'Strike_Short']], hide_index=True,
-                         column_config=None)
-            st.text('Expected Move HV: ' + str(round(exp_move_hv, 3)))
-            st.text('Expected Move IV: ' + str(round(exp_move_iv, 3)))
-            st.text('Total Parameters:')
-            st.dataframe(strengle_data, hide_index=True, column_config=None)
+                st.text(f'Profit Percentage form {percentage_type}: {round(profit_for_percent, 2)}')
+                st.text('Best Parameters:')
+                st.dataframe(best_df[['pop', 'exp_return', 'cvar', 'Strike_Long', 'Strike_Short']], hide_index=True,
+                             column_config=None)
+                st.text('Expected Move HV: ' + str(round(exp_move_hv, 3)))
+                st.text('Expected Move IV: ' + str(round(exp_move_iv, 3)))
+                st.text('Total Parameters:')
+                st.dataframe(strengle_data, hide_index=True, column_config=None)

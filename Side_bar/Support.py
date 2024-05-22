@@ -18,6 +18,8 @@ from .popoption.CallCalendar_template import callCalendar_template
 from .popoption.RiskReversal import riskReversal
 from .popoption.LongPut import longPut
 from .popoption.LongCall import longCall
+from .popoption.Fut_DA_BUT import fut_DA_BUT
+from .popoption.FutRation_1_1_2 import futRatio_1_1_2
 from sklearn.linear_model import LinearRegression
 
 
@@ -60,7 +62,7 @@ def get_strangle(tick, rate, percentage_array, days_to_expiration, closing_days_
 
     yahoo_stock = get_yahoo_price(tick)
     underlying = yahoo_stock['Close'].iloc[-1]
-    trials = 2000
+    trials = 5000
 
     sum_df = pd.DataFrame()
     hv = get_exp_move(tick, yahoo_stock)
@@ -116,13 +118,31 @@ def get_strangle(tick, rate, percentage_array, days_to_expiration, closing_days_
 
     return sum_df, best_df, exp_move_hv, exp_move_iv
 
+def get_f_strangle(tick, rate, percentage_array, days_to_expiration, closing_days_array, sigma_call, sigma_put, call_price,
+                   put_price, call_strike, put_strike):
+
+    yahoo_stock = get_yahoo_price(tick)
+    underlying = yahoo_stock['Close'].iloc[-1]
+    trials = 5000
+
+    hv = get_exp_move(tick, yahoo_stock)
+
+    strangle_data = shortStrangle(underlying, (sigma_call + sigma_put) / 2, rate, trials, days_to_expiration,
+                                  [closing_days_array], [percentage_array], call_strike,
+                                  call_price, put_strike, put_price, yahoo_stock)
+
+    strangle_data = pd.DataFrame(strangle_data)
+
+    exp_move_hv = hv * underlying * math.sqrt(days_to_expiration / 365)
+
+    return strangle_data, exp_move_hv
 
 def get_short(tick, rate, days_to_expiration, closing_days_array, percentage_array,
               position_type, quotes):
     print(quotes)
     yahoo_stock = get_yahoo_price(tick)
     underlying = yahoo_stock['Close'].iloc[-1]
-    trials = 2000
+    trials = 5000
 
     sum_df = pd.DataFrame()
 
@@ -173,12 +193,43 @@ def get_short(tick, rate, days_to_expiration, closing_days_array, percentage_arr
 
     return sum_df, best_df, exp_move_hv, exp_move_iv
 
+def get_f_short(tick, rate, days_to_expiration, closing_days_array, percentage_array,
+              position_type, sigma, short_strike, short_price):
+
+    yahoo_stock = get_yahoo_price(tick)
+    underlying = yahoo_stock['Close'].iloc[-1]
+    trials = 5000
+
+    sum_df = pd.DataFrame()
+
+    hv = get_exp_move(tick, yahoo_stock)
+
+    if position_type == 'Put':
+        # quotes = quotes[quotes['side'] == 'put'].reset_index(drop=True)
+        # quotes = quotes[quotes['strike'] <= underlying * 1].reset_index(drop=True)
+        # quotes = quotes[quotes['strike'] >= underlying * 0.9].reset_index(drop=True)
+        # for num, quote_row in quotes.iterrows():
+        short_data = shortPut(underlying, sigma, rate, trials, days_to_expiration, [closing_days_array],
+                              [percentage_array],
+                              short_strike, short_price, yahoo_stock)
+        short_data = pd.DataFrame(short_data)
+
+    if position_type == 'Call':
+
+        short_data = shortCall(underlying, sigma, rate, trials, days_to_expiration, [closing_days_array],
+                               [percentage_array],
+                               short_strike, short_price, yahoo_stock)
+        short_data = pd.DataFrame(short_data)
+
+    exp_move_hv = hv * underlying * math.sqrt(days_to_expiration / 365)
+
+    return short_data, exp_move_hv
 
 def get_calendar_diagonal(tick, rate, days_to_expiration_long, days_to_expiration_short, closing_days_array,
                           percentage_array, position_type, quotes_short, quotes_long, short_count, long_count, position_options):
     yahoo_stock = get_yahoo_price(tick)
     underlying = yahoo_stock['Close'].iloc[-1]
-    trials = 2000
+    trials = 5000
 
     sum_df = pd.DataFrame()
 
@@ -196,13 +247,31 @@ def get_calendar_diagonal(tick, rate, days_to_expiration_long, days_to_expiratio
             for num_long, quotes_long_row in quotes_long.iterrows():
                 sigma_short = quotes_short_row['iv'] * 100
                 short_strike = quotes_short_row['strike']
-                short_price = quotes_short_row['bid'] * short_count
+                short_price = quotes_short_row['bid']
                 sigma_long = quotes_long_row['iv'] * 100
                 long_strike = quotes_long_row['strike']
-                long_price = quotes_long_row['ask'] * long_count
+                long_price = quotes_long_row['ask']
 
                 if position_options['structure'] == 'calendar':
                     if quotes_short_row['strike'] == quotes_long_row['strike']:
+                        print('underlying', underlying)
+                        print('short_count', short_count)
+                        print('long_count', long_count)
+                        print('rate', rate)
+                        print('short bid', quotes_short_row['bid'])
+                        print('short_price', short_price)
+                        print('long ask', quotes_long_row['ask'])
+                        print('long_price', long_price)
+                        print('long_strike', long_strike)
+                        print('short_strike', short_strike)
+                        print('sigma_long', sigma_long)
+                        print('sigma_short', sigma_short)
+                        print('days_to_expiration_short', days_to_expiration_short)
+                        print('days_to_expiration_long', days_to_expiration_long)
+                        print('closing_days_array', closing_days_array)
+                        print('percentage_array', percentage_array)
+                        print('position_options', position_options)
+
                         calendar_diagonal_data, max_profit, percentage_type = putCalendar_template(underlying, sigma_short, sigma_long, rate, trials,
                                                              days_to_expiration_short, days_to_expiration_long,
                                                              [closing_days_array],
@@ -314,7 +383,7 @@ def get_calendar_diagonal_input(tick, sigma_long, sigma_short, rate, days_to_exp
                                 short_strike, short_price, position_type, short_count_solo, long_count_solo):
     yahoo_stock = get_yahoo_price(tick)
     underlying = yahoo_stock['Close'].iloc[-1]
-    trials = 2000
+    trials = 5000
     if position_type == 'Put':
         calendar_diagonal_data, profit_for_percent, percentage_type = putCalendar(underlying, sigma_short, sigma_long, rate, trials,
                                              days_to_expiration_short,
@@ -339,7 +408,7 @@ def get_risk_reversal(tick, sigma, rate, days_to_expiration, closing_days_array,
                       percentage_array, long_strike, long_price, short_strike, short_price):
     yahoo_stock = get_yahoo_price(tick)
     underlying = yahoo_stock['Close'].iloc[-1]
-    trials = 2000
+    trials = 5000
 
     risk_reversal_data = riskReversal(underlying, sigma, rate, trials, days_to_expiration,
                                       [closing_days_array], [percentage_array], long_strike, long_price, short_strike,
@@ -354,7 +423,7 @@ def get_long(tick, sigma, rate, days_to_expiration, closing_days_array, percenta
              long_strike, long_price, position_type):
     yahoo_stock = get_yahoo_price(tick)
     underlying = yahoo_stock['Close'].iloc[-1]
-    trials = 2000
+    trials = 5000
 
     if position_type == 'Put':
         long_data = longPut(underlying, sigma, rate, trials, days_to_expiration, [closing_days_array],
@@ -369,3 +438,71 @@ def get_long(tick, sigma, rate, days_to_expiration, closing_days_array, percenta
         print("Long Call: ", long_data)
 
     return pd.DataFrame(long_data)
+
+def get_f_long(tick, rate, days_to_expiration, closing_days_array, percentage_array,
+                                  position_type, sigma, long_strike, long_price):
+    yahoo_stock = get_yahoo_price(tick)
+    underlying = yahoo_stock['Close'].iloc[-1]
+    trials = 5000
+
+    if position_type == 'Put':
+        long_data = longPut(underlying, sigma, rate, trials, days_to_expiration, [closing_days_array],
+                            [percentage_array],
+                            long_strike, long_price, yahoo_stock)
+        print("Long Put: ", long_data)
+
+    if position_type == 'Call':
+        long_data = longCall(underlying, sigma, rate, trials, days_to_expiration, [closing_days_array],
+                             [percentage_array],
+                             long_strike, long_price, yahoo_stock)
+        print("Long Call: ", long_data)
+
+    return pd.DataFrame(long_data)
+
+def get_f_da_but(ticker, rate, days_to_expiration_1, days_to_expiration_2_long, closing_days_array, percentage_array,
+                       long_1_sigma, long_2_sigma, short_sigma, long_1_prime, long_2_prime, short_prime, long_1_strike,
+                      long_2_strike, short_strike, long_1_count, long_2_count, short_count):
+
+    yahoo_stock = get_yahoo_price(ticker)
+    underlying = yahoo_stock['Close'].iloc[-1]
+    trials = 5000
+
+    hv = get_exp_move(ticker, yahoo_stock)
+
+
+    da_bat_data = fut_DA_BUT(underlying, long_1_sigma, long_2_sigma, short_sigma, rate, trials,
+     days_to_expiration_1, days_to_expiration_2_long, [closing_days_array], [percentage_array], long_1_strike,
+     long_2_strike, short_strike, long_1_prime, long_2_prime, short_prime, yahoo_stock, long_1_count,
+     long_2_count, short_count)
+
+
+    da_bat_data = pd.DataFrame(da_bat_data)
+    print('da_bat_data', da_bat_data)
+
+    exp_move_hv = hv * underlying * math.sqrt(days_to_expiration_1 / 365)
+
+    return da_bat_data
+
+def get_f_ratio_112(ticker, long_sigma, short_1_sigma, short_2_sigma, rate, days_to_expiration,
+                          closing_days_array, percentage_array, long_strike, short_1_strike, short_2_strike,
+                          long_prime, short_1_prime, short_2_prime,  long_count, short_1_count, short_2_count):
+
+    yahoo_stock = get_yahoo_price(ticker)
+    underlying = yahoo_stock['Close'].iloc[-1]
+    trials = 5000
+
+    hv = get_exp_move(ticker, yahoo_stock)
+
+
+    da_ratio_112_data = futRatio_1_1_2(underlying, long_sigma, short_1_sigma, short_2_sigma, rate, trials,
+                days_to_expiration, [closing_days_array], [percentage_array], long_strike,
+                short_1_strike, short_2_strike, long_prime, short_1_prime,  short_2_prime, yahoo_stock, long_count,
+                short_1_count, short_2_count)
+
+    print('da_ratio_112_data', da_ratio_112_data)
+    da_ratio_112_data = pd.DataFrame(da_ratio_112_data)
+
+
+    exp_move_hv = hv * underlying * math.sqrt(days_to_expiration / 365)
+
+    return da_ratio_112_data

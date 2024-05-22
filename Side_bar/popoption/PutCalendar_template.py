@@ -35,9 +35,9 @@ def putCalendar_template(underlying, sigma_short, sigma_long, rate, trials, days
         raise ValueError("closing_days_array and percentage_array sizes must be equal.")
 
     # SIMULATION
-    initial_debit = abs(put_long_price - put_short_price)  # Debit paid from opening trade
+    initial_debit = abs((put_long_price*long_count) - (put_short_price*short_count))  # Debit paid from opening trade
     # initial_credit = -1 * initial_debit
-    initial_credit = put_short_price - put_long_price
+    initial_credit = (put_short_price*short_count) -(put_long_price*long_count)
     max_profit = initial_debit
     percentage_type = 'Initial'
     if position_options['pop_from'] == 'margin':
@@ -66,7 +66,6 @@ def putCalendar_template(underlying, sigma_short, sigma_long, rate, trials, days
                                                             days_to_expiration_short, days_to_expiration_long,
                                                             closing_days_array, trials, initial_credit, min_profit,
                                                             strikes, bsm_debit, yahoo_stock, short_count, long_count)
-
 
     response = {
         "pop": pop,

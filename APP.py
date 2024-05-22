@@ -17,9 +17,34 @@ st.markdown(hide_st_style, unsafe_allow_html=True)
 
 infoType = st.sidebar.radio(
     "Choose a position type",
-    ('Strangle', 'Short', 'Long', 'Calendar/Diagonal', 'Risk Reversal') # 'Call Monitoring',
+    ('F. Short', 'F. Long', 'F. Strangle', 'F. DA Bat', 'F. Ratio 112', 'Strangle', 'Short', 'Long', 'Calendar/Diagonal',
+     'Risk Reversal') # 'Call Monitoring',
 )
 
+# =====================================   F. DA Bat
+if infoType == 'F. DA Bat':
+    st.title('F. DA Bat')
+    f_da_bat()
+
+# =====================================   F. Ratio 112
+if infoType == 'F. Ratio 112':
+    st.title('F. Ratio 112')
+    f_ratio_112()
+
+# =====================================   F. Short
+if infoType == 'F. Short':
+    st.title('F. Short')
+    f_short()
+
+# =====================================   F. Long
+if infoType == 'F. Long':
+    st.title('F. Long')
+    f_long()
+
+# =====================================   F. Strangle
+if infoType == 'F. Strangle':
+    st.title('F. Strangle Position')
+    f_strangle()
 
 # =====================================   Strangle
 if infoType == 'Strangle':
